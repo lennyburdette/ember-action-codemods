@@ -5,7 +5,8 @@
   "author": "lennyburdette@gmail.com",
   "license": "MIT",
   "dependencies": {
-    "ember-template-recast": "^1.2.5"
+    "ember-template-recast": "^1.2.5",
+    "jscodeshift": "^0.6.4"
   },
   "devDependencies": {
     "jest": "^24.8.0"
