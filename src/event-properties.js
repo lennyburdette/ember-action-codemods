@@ -21,7 +21,7 @@ module.exports = function({ source, path }, { parse, visit }) {
 
         for (const attr of eventAttributes) {
           const eventName = attr.name.replace(/^on/, '');
-          const expr = convertExpression(attr.value, b);
+          const expr = addPreventDefault(convertExpression(attr.value, b), b);
 
           modifiers.push(
             b.elementModifier('on', [
@@ -45,6 +45,8 @@ module.exports = function({ source, path }, { parse, visit }) {
     };
   });
 };
+
+// COPY PASTE FROM action-modifiers.js TO MAKE THE FILE SELF-CONTAINED
 
 function convertExpression(expr, b) {
   let action = expr;
@@ -81,15 +83,26 @@ function convertExpression(expr, b) {
     action.hash.pairs.push(target);
   }
 
+  // {{action foo allowedKeys="alt"}} -> (action foo allowedKeys="alt")
+  const allowedKeys = getAllowedKeys(expr.hash);
+  if (allowedKeys) {
+    if (!wrappedInAction) {
+      action = b.sexpr('action', [action]);
+    }
+    action.hash.pairs.push(allowedKeys);
+  }
+
   // {{action foo bar}} -> (fn foo bar)
   if (params.length) {
     action = b.sexpr('fn', [action, ...params]);
   }
 
-  // * -> (prevent-default *)
-  action = b.sexpr('prevent-default', [action]);
-
   return action;
+}
+
+function addPreventDefault(action, b) {
+  // * -> (prevent-default *)
+  return b.sexpr('prevent-default', [action]);
 }
 
 function getTarget(hash) {
@@ -98,4 +111,8 @@ function getTarget(hash) {
 
 function getValue(hash) {
   return hash.pairs.find(p => p.key === 'value');
+}
+
+function getAllowedKeys(hash) {
+  return hash.pairs.find(p => p.key === 'allowedKeys');
 }

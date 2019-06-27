@@ -52,6 +52,10 @@ module.exports = function({ source, path }, { parse, visit }) {
           action.hash.pairs.push(allowedKeys);
         }
 
+        if (argIsClosureAction(action)) {
+          action = convertExpression(action, b);
+        }
+
         // {{action foo bar}} -> {{on "click"  (fn foo bar)}}
         if (curriedArgs.length) {
           action = b.sexpr('fn', [action, ...curriedArgs])
@@ -123,4 +127,62 @@ function getValue(hash) {
 
 function getAllowedKeys(hash) {
   return hash.pairs.find(p => p.key === 'allowedKeys');
+}
+
+function argIsClosureAction(expression) {
+  return expression.type === 'SubExpression' && expression.path.original === 'action';
+}
+
+// COPY PASTE FROM event-properties.js TO MAKE THE FILE SELF-CONTAINED
+
+function convertExpression(expr, b) {
+  let action = expr;
+  let params = [];
+  let wrappedInAction = false;
+
+  if (expr.path.original === 'action') {
+    [action, ...params] = expr.params;
+  } else {
+    action = expr.path;
+  }
+
+  // {{action "foo"}} -> (action "foo")
+  if (action.type === 'StringLiteral') {
+    action = b.sexpr('action', [action]);
+    wrappedInAction = true;
+  }
+
+  // {{action foo value="target.value"}} -> (action foo value="target.value")
+  const value = getValue(expr.hash);
+  if (value) {
+    if (!wrappedInAction) {
+      action = b.sexpr('action', [action]);
+    }
+    action.hash.pairs.push(value);
+  }
+
+  // {{action foo target=service}} -> (action foo target=service)
+  const target = getTarget(expr.hash);
+  if (target) {
+    if (!wrappedInAction) {
+      action = b.sexpr('action', [action]);
+    }
+    action.hash.pairs.push(target);
+  }
+
+  // {{action foo allowedKeys="alt"}} -> (action foo allowedKeys="alt")
+  const allowedKeys = getAllowedKeys(expr.hash);
+  if (allowedKeys) {
+    if (!wrappedInAction) {
+      action = b.sexpr('action', [action]);
+    }
+    action.hash.pairs.push(allowedKeys);
+  }
+
+  // {{action foo bar}} -> (fn foo bar)
+  if (params.length) {
+    action = b.sexpr('fn', [action, ...params]);
+  }
+
+  return action;
 }

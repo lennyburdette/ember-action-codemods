@@ -92,6 +92,16 @@ const TESTS = [
     'bubbles=this.dynamicValue',
     `<button {{action foo bubbles=this.dynamicValue}}>button</button>`,
     `<button {{action foo bubbles=this.dynamicValue}}>button</button>`
+  ],
+  [
+    'mut',
+    `<button {{action (action (mut this.enabled) false)}}>button</button>`,
+    `<button {{on "click" (prevent-default (fn (mut this.enabled) false))}}>button</button>`
+  ],
+  [
+    'closure actions',
+    `<button {{action (action "foo" false)}}>button</button>`,
+    `<button {{on "click" (prevent-default (fn (action "foo") false))}}>button</button>`
   ]
 ];
 
