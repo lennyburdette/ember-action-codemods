@@ -21,27 +21,37 @@ const TESTS = [
   [
     'onclick={{action "foo"}}',
     `<button onclick={{action "foo"}}>button</button>`,
-    `<button {{on "click" (prevent-default (action "foo"))}}>button</button>`
+    `<button {{on "click" (action "foo")}}>button</button>`
   ],
   [
     'onmousedown={{foo}}',
     `<button onmousedown={{foo}}>button</button>`,
-    `<button {{on "mousedown" (prevent-default foo)}}>button</button>`
+    `<button {{on "mousedown" foo}}>button</button>`
   ],
   [
     'onclick={{action foo bar}}',
     `<button onclick={{action foo bar}}>button</button>`,
-    `<button {{on "click" (prevent-default (fn foo bar))}}>button</button>`
+    `<button {{on "click" (fn foo bar)}}>button</button>`
   ],
   [
     'value="target.value"',
     `<button onclick={{action foo value="target.value"}}>button</button>`,
-    `<button {{on "click" (prevent-default (action foo value="target.value"))}}>button</button>`
+    `<button {{on "click" (action foo value="target.value")}}>button</button>`
   ],
   [
     'target=something',
     `<button onclick={{action foo target=something}}>button</button>`,
-    `<button {{on "click" (prevent-default (action foo target=something))}}>button</button>`
+    `<button {{on "click" (action foo target=something)}}>button</button>`
+  ],
+  [
+    'not an action',
+    `<button onclick={{or foo bar}}>button</button>`,
+    `<button {{on "click" (or foo bar)}}>button</button>`
+  ],
+  [
+    'nested actions',
+    `<button onclick={{or (action "foo") (action this.bar baz)}}>button</button>`,
+    `<button {{on "click" (or (action "foo") (fn this.bar baz))}}>button</button>`
   ]
 ];
 

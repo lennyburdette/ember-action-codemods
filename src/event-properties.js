@@ -21,7 +21,15 @@ module.exports = function({ source, path }, { parse, visit }) {
 
         for (const attr of eventAttributes) {
           const eventName = attr.name.replace(/^on/, '');
-          const expr = addPreventDefault(convertExpression(attr.value, b), b);
+
+          let expr;
+          // if it starts with "action", clean it up
+          // if it starts with anything else, recursively clean up closure actions
+          if (isActionStatement(attr.value)) {
+            expr = convertExpression(attr.value, b);
+          } else {
+            expr = convertArgument(attr.value, b);
+          }
 
           modifiers.push(
             b.elementModifier('on', [
@@ -46,12 +54,26 @@ module.exports = function({ source, path }, { parse, visit }) {
   });
 };
 
+function convertArgument(statement, b) {
+  if (!statement.params.length && !statement.hash.pairs.length) {
+    return statement.path;
+  }
+
+  const params = statement.params.map(param => convertExpression(param, b));
+
+  return b.sexpr(statement.path.original, params, statement.hash);
+}
+
 // COPY PASTE FROM action-modifiers.js TO MAKE THE FILE SELF-CONTAINED
 
 function convertExpression(expr, b) {
   let action = expr;
   let params = [];
   let wrappedInAction = false;
+
+  if (!expr.path) {
+    return expr;
+  }
 
   if (expr.path.original === 'action') {
     [action, ...params] = expr.params;
@@ -100,11 +122,6 @@ function convertExpression(expr, b) {
   return action;
 }
 
-function addPreventDefault(action, b) {
-  // * -> (prevent-default *)
-  return b.sexpr('prevent-default', [action]);
-}
-
 function getTarget(hash) {
   return hash.pairs.find(p => p.key === 'target');
 }
@@ -115,4 +132,12 @@ function getValue(hash) {
 
 function getAllowedKeys(hash) {
   return hash.pairs.find(p => p.key === 'allowedKeys');
+}
+
+function isActionStatement(statement) {
+  return statement.type === 'MustacheStatement' && statement.path.original === 'action';
+}
+
+function isClosureAction(expression) {
+  return expression.type === 'SubExpression' && expression.path.original === 'action';
 }
