@@ -102,6 +102,11 @@ const TESTS = [
     'closure actions',
     `<button {{action (action "foo" false)}}>button</button>`,
     `<button {{on "click" (prevent-default (fn (action "foo") false))}}>button</button>`
+  ],
+  [
+    'idempotent',
+    `<button {{on "click" (prevent-default (fn (action "foo") false))}}>button</button>`,
+    `<button {{on "click" (prevent-default (fn (action "foo") false))}}>button</button>`
   ]
 ];
 

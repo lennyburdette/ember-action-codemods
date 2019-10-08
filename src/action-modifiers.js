@@ -14,6 +14,10 @@ module.exports = function({ source, path }, { parse, visit }) {
           return node;
         }
 
+        if (node.path.original !== 'action') {
+          return node;
+        }
+
         const newNode = b.mustache('on');
 
         let [action, ...curriedArgs] = node.params;
