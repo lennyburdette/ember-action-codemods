@@ -5,8 +5,9 @@
 ### Step 1: Install dependencies
 
 ```sh
-yarn add --dev ember-template-recast
-yarn add ember-on-modifier ember-fn-helper-polyfill ember-event-helpers
+yarn add ember-event-helpers
+# if you're on ember-source 3.9 or below
+yarn add ember-on-modifier ember-fn-helper-polyfill
 ```
 
 ### Step 2: Convert `{{action}}` modifiers to `{{on}}` modifiers
@@ -14,7 +15,7 @@ yarn add ember-on-modifier ember-fn-helper-polyfill ember-event-helpers
 This is the safest of the codemods.
 
 ```sh
-yarn ember-template-recast app/ -t \
+npx ember-template-recast app/ -t \
   https://raw.githubusercontent.com/lennyburdette/ember-action-codemods/master/src/action-modifiers.js
 ```
 
@@ -27,7 +28,7 @@ See https://developer.squareup.com/blog/deep-dive-on-ember-events/
 for a comprehensive rundown.
 
 ```sh
-yarn ember-template-recast app/ -t \
+npx ember-template-recast app/ -t \
   https://raw.githubusercontent.com/lennyburdette/ember-action-codemods/master/src/event-properties.js
 ```
 
@@ -50,7 +51,7 @@ If you're not using the `actions` hash in components and controllers, this is
 safe to do.
 
 ```sh
-yarn ember-template-recast app/ -t \
+npx ember-template-recast app/ -t \
   https://raw.githubusercontent.com/lennyburdette/ember-action-codemods/master/src/string-actions.js
 ```
 
