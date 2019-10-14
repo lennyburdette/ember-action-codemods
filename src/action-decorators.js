@@ -68,6 +68,7 @@ module.exports = function transformer(file, api) {
     } else {
       ast
         .find(j.ImportDeclaration)
+        .at(0)
         .insertAfter(
           j.importDeclaration([newSpecifier], j.literal('@ember/object'))
         );
