@@ -80,7 +80,7 @@ module.exports = function transformer(file, api) {
 
 function isActionsHash(prop) {
   return (
-    prop.key.name === 'actions' &&
+    prop.key && prop.key.name === 'actions' &&
     (prop.value && prop.value.type === 'ObjectExpression')
   );
 }
